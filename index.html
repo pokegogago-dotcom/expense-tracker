@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PickleQ - Pickleball Queue Manager</title>
+  <title>Willis Pickle Watson</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -13,14 +13,38 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-24 font-sans select-none">
 
-  <!-- TOP HEADER -->
+  <!-- TOP HEADER WITH CUSTOM SVG BRANDING -->
   <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
-    <div>
-      <h1 class="text-xl font-black tracking-wider text-green-400 uppercase flex items-center gap-2">
-        <span>🏓</span> PickleQ
-      </h1>
-      <p id="sessionSummary" class="text-xs text-slate-400">0 Players · 1 Court</p>
+    <div class="flex items-center gap-3">
+      <!-- Willis Pickle Watson Custom Logo SVG -->
+      <svg class="w-10 h-10 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Detective Hat (Watson) -->
+        <path d="M25 40 C25 25, 75 25, 75 40 Z" fill="#334155"/>
+        <path d="M15 40 C15 37, 85 37, 85 40 L80 44 L20 44 Z" fill="#1E293B"/>
+        <path d="M40 28 C45 28, 55 28, 60 28 L58 37 L42 37 Z" fill="#475569"/>
+        
+        <!-- Pickleball Body (Pickle) -->
+        <circle cx="50" cy="62" r="22" fill="#4ADE80" stroke="#16A34A" stroke-width="2"/>
+        <!-- Pickleball Holes -->
+        <circle cx="42" cy="56" r="2.5" fill="#16A34A"/>
+        <circle cx="58" cy="56" r="2.5" fill="#16A34A"/>
+        <circle cx="50" cy="64" r="2.5" fill="#16A34A"/>
+        <circle cx="40" cy="68" r="2" fill="#16A34A"/>
+        <circle cx="60" cy="68" r="2" fill="#16A34A"/>
+
+        <!-- Detective Monocle (Sherlock/Watson Vibe) -->
+        <circle cx="57" cy="56" r="6" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
+        <path d="M63 56 Q68 62 70 72" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
+      </svg>
+
+      <div>
+        <h1 class="text-base font-black tracking-wider text-green-400 uppercase leading-none">
+          Willis Pickle Watson
+        </h1>
+        <p id="sessionSummary" class="text-[11px] text-slate-400 mt-1">0 Players · 1 Court</p>
+      </div>
     </div>
+
     <button onclick="resetSession()" class="text-xs bg-red-900/40 text-red-300 border border-red-700/50 px-3 py-1.5 rounded-lg active:bg-red-800">
       Reset All
     </button>
@@ -48,19 +72,11 @@
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Active Courts</h2>
           <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">
-            ⚡ Generate Matches
+            ⚡ Deduce Matches
           </button>
         </div>
         <div id="courtsContainer" class="space-y-3">
           <!-- Dynamic Courts Rendered Here -->
-        </div>
-      </section>
-
-      <!-- On Deck Preview -->
-      <section class="bg-slate-800/40 border border-slate-800 p-3.5 rounded-2xl">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">👀 On Deck (Up Next)</h3>
-        <div id="onDeckList" class="text-xs text-slate-400 italic">
-          No matches generated yet.
         </div>
       </section>
 
@@ -122,7 +138,7 @@
 
     <!-- TAB 3: LEADERBOARD -->
     <div id="tab-leaderboard" class="tab-content space-y-4">
-      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Session Leaderboard</h2>
+      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Case Records (Leaderboard)</h2>
       <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
@@ -142,10 +158,10 @@
 
   </main>
 
-  <!-- BOTTOM MOBILE NAVIGATION BAR -->
+  <!-- BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-6 py-2 flex justify-around items-center z-20">
     <button onclick="switchTab('play')" id="nav-play" class="flex flex-col items-center gap-1 text-green-400">
-      <span class="text-lg">🎾</span>
+      <span class="text-lg">🔎</span>
       <span class="text-[10px] font-bold">Queue</span>
     </button>
     <button onclick="switchTab('players')" id="nav-players" class="flex flex-col items-center gap-1 text-slate-400">
@@ -159,14 +175,14 @@
   </nav>
 
   <script>
-    let state = JSON.parse(localStorage.getItem('pickleQ_state')) || {
+    let state = JSON.parse(localStorage.getItem('wpw_state')) || {
       players: [],
       courts: [{ id: 1, team1: [], team2: [], active: false }],
       history: []
     };
 
     function saveState() {
-      localStorage.setItem('pickleQ_state', JSON.stringify(state));
+      localStorage.setItem('wpw_state', JSON.stringify(state));
       render();
     }
 
@@ -209,7 +225,6 @@
       const hours = parseInt(document.getElementById('sessionHours').value);
       const courts = parseInt(document.getElementById('courtCount').value);
       
-      // Update Court structures
       while(state.courts.length < courts) {
         state.courts.push({ id: state.courts.length + 1, team1: [], team2: [], active: false });
       }
@@ -217,11 +232,9 @@
         state.courts.pop();
       }
 
-      const totalPlayerSlots = courts * 4;
       const totalPlayers = state.players.length;
-      
       if (totalPlayers > 0) {
-        const gamesPerHourPerCourt = 4; // ~15 mins per game
+        const gamesPerHourPerCourt = 4;
         const totalGamesPossible = hours * courts * gamesPerHourPerCourt;
         const targetPerPlayer = Math.floor((totalGamesPossible * 4) / totalPlayers);
         
@@ -242,10 +255,9 @@
         return;
       }
 
-      state.courts.forEach((court, idx) => {
+      state.courts.forEach((court) => {
         const pool = availablePlayers.splice(0, 4);
         if (pool.length === 4) {
-          // Shuffle four selected players into two teams
           pool.sort(() => Math.random() - 0.5);
           court.team1 = [pool[0], pool[1]];
           court.team2 = [pool[2], pool[3]];
@@ -253,7 +265,6 @@
         }
       });
 
-      // Increase resting counter for unselected players
       const activeIds = state.courts.flatMap(c => [...c.team1, ...c.team2]).map(p => p.id);
       state.players.forEach(p => {
         if (!activeIds.includes(p.id)) p.restingRounds++;
@@ -288,7 +299,6 @@
     function render() {
       document.getElementById('sessionSummary').innerText = `${state.players.length} Players · ${state.courts.length} Court(s)`;
 
-      // Render Courts
       const courtsContainer = document.getElementById('courtsContainer');
       courtsContainer.innerHTML = '';
       
@@ -327,7 +337,6 @@
         courtsContainer.appendChild(div);
       });
 
-      // Render Bench & Active Status
       const activePlayerIds = state.courts.flatMap(c => [...c.team1, ...c.team2]).map(p => p.id);
       const benchList = document.getElementById('benchList');
       benchList.innerHTML = '';
@@ -345,7 +354,6 @@
         benchList.appendChild(card);
       });
 
-      // Render Roster Controls
       const rosterList = document.getElementById('rosterList');
       rosterList.innerHTML = '';
       state.players.forEach(p => {
@@ -358,7 +366,6 @@
         rosterList.appendChild(row);
       });
 
-      // Render Leaderboard
       const leaderboardBody = document.getElementById('leaderboardBody');
       leaderboardBody.innerHTML = '';
       
@@ -387,7 +394,6 @@
       }
     }
 
-    // Initial load
     updatePlanner();
     render();
   </script>
