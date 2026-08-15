@@ -13,49 +13,34 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-24 font-sans select-none">
 
-  <!-- TOP HEADER WITH CUSTOM SVG BRANDING -->
+  <!-- TOP HEADER WITH SVG BRANDING -->
   <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
     <div class="flex items-center gap-3">
-      <!-- Willis Pickle Watson Custom Logo SVG -->
       <svg class="w-10 h-10 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Detective Hat (Watson) -->
         <path d="M25 40 C25 25, 75 25, 75 40 Z" fill="#334155"/>
         <path d="M15 40 C15 37, 85 37, 85 40 L80 44 L20 44 Z" fill="#1E293B"/>
         <path d="M40 28 C45 28, 55 28, 60 28 L58 37 L42 37 Z" fill="#475569"/>
-        
-        <!-- Pickleball Body (Pickle) -->
         <circle cx="50" cy="62" r="22" fill="#4ADE80" stroke="#16A34A" stroke-width="2"/>
-        <!-- Pickleball Holes -->
         <circle cx="42" cy="56" r="2.5" fill="#16A34A"/>
         <circle cx="58" cy="56" r="2.5" fill="#16A34A"/>
         <circle cx="50" cy="64" r="2.5" fill="#16A34A"/>
         <circle cx="40" cy="68" r="2" fill="#16A34A"/>
         <circle cx="60" cy="68" r="2" fill="#16A34A"/>
-
-        <!-- Detective Monocle (Sherlock/Watson Vibe) -->
         <circle cx="57" cy="56" r="6" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
         <path d="M63 56 Q68 62 70 72" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
       </svg>
-
       <div>
-        <h1 class="text-base font-black tracking-wider text-green-400 uppercase leading-none">
-          Willis Pickle Watson
-        </h1>
-        <p id="sessionSummary" class="text-[11px] text-slate-400 mt-1">0 Players · 1 Court</p>
+        <h1 class="text-base font-black tracking-wider text-green-400 uppercase leading-none">Willis Pickle Watson</h1>
+        <p id="sessionSummary" class="text-[11px] text-slate-400 mt-1">0 Active · 1 Court</p>
       </div>
     </div>
-
-    <button onclick="resetSession()" class="text-xs bg-red-900/40 text-red-300 border border-red-700/50 px-3 py-1.5 rounded-lg active:bg-red-800">
-      Reset All
-    </button>
+    <button onclick="resetSession()" class="text-xs bg-red-900/40 text-red-300 border border-red-700/50 px-3 py-1.5 rounded-lg active:bg-red-800">Reset</button>
   </header>
 
   <main class="p-4 max-w-md mx-auto space-y-5">
 
-    <!-- TAB 1: COURTS & QUEUE -->
+    <!-- TAB 1: QUEUE -->
     <div id="tab-play" class="tab-content active space-y-5">
-      
-      <!-- Session Planner Widget -->
       <div class="bg-slate-800/80 border border-slate-700 p-3.5 rounded-2xl flex justify-between items-center text-xs">
         <div>
           <span class="text-slate-400 block">Session Target</span>
@@ -67,38 +52,27 @@
         </div>
       </div>
 
-      <!-- Active Courts -->
       <section>
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Active Courts</h2>
-          <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">
-            ⚡ Deduce Matches
-          </button>
+          <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">⚡ Deduce Matches</button>
         </div>
-        <div id="courtsContainer" class="space-y-3">
-          <!-- Dynamic Courts Rendered Here -->
-        </div>
+        <div id="courtsContainer" class="space-y-3"></div>
       </section>
 
-      <!-- Resting Bench -->
       <section>
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">Bench / Waiting List</h2>
-        <div id="benchList" class="grid grid-cols-2 gap-2">
-          <!-- Waiting Players Rendered Here -->
-        </div>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">Bench / Queue</h2>
+        <div id="benchList" class="grid grid-cols-2 gap-2"></div>
       </section>
-
     </div>
 
-    <!-- TAB 2: PLAYERS & SETUP -->
+    <!-- TAB 2: PLAYERS -->
     <div id="tab-players" class="tab-content space-y-5">
-      
-      <!-- Setup Controls -->
       <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-4">
         <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Session Settings</h2>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs text-slate-400 block mb-1">Session Duration</label>
+            <label class="text-xs text-slate-400 block mb-1">Duration</label>
             <select id="sessionHours" onchange="updatePlanner()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none">
               <option value="1">1 Hour</option>
               <option value="2">2 Hours</option>
@@ -107,7 +81,7 @@
             </select>
           </div>
           <div>
-            <label class="text-xs text-slate-400 block mb-1">Available Courts</label>
+            <label class="text-xs text-slate-400 block mb-1">Courts</label>
             <select id="courtCount" onchange="updatePlanner()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none">
               <option value="1" selected>1 Court</option>
               <option value="2">2 Courts</option>
@@ -117,7 +91,6 @@
         </div>
       </section>
 
-      <!-- Add Player Form -->
       <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
         <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Add Player</h2>
         <form id="addPlayerForm" class="flex gap-2">
@@ -126,19 +99,15 @@
         </form>
       </section>
 
-      <!-- Roster List -->
       <section>
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">Current Roster</h2>
-        <div id="rosterList" class="space-y-2">
-          <!-- Roster Items -->
-        </div>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">Roster & Status</h2>
+        <div id="rosterList" class="space-y-2"></div>
       </section>
-
     </div>
 
     <!-- TAB 3: LEADERBOARD -->
     <div id="tab-leaderboard" class="tab-content space-y-4">
-      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Case Records (Leaderboard)</h2>
+      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Leaderboard</h2>
       <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
@@ -149,16 +118,12 @@
               <th class="p-3 text-right">Win %</th>
             </tr>
           </thead>
-          <tbody id="leaderboardBody" class="divide-y divide-slate-700/50 text-slate-200">
-            <!-- Leaderboard Rows -->
-          </tbody>
+          <tbody id="leaderboardBody" class="divide-y divide-slate-700/50 text-slate-200"></tbody>
         </table>
       </div>
     </div>
-
   </main>
 
-  <!-- BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-6 py-2 flex justify-around items-center z-20">
     <button onclick="switchTab('play')" id="nav-play" class="flex flex-col items-center gap-1 text-green-400">
       <span class="text-lg">🔎</span>
@@ -177,8 +142,7 @@
   <script>
     let state = JSON.parse(localStorage.getItem('wpw_state')) || {
       players: [],
-      courts: [{ id: 1, team1: [], team2: [], active: false }],
-      history: []
+      courts: [{ id: 1, team1: [], team2: [], active: false }]
     };
 
     function saveState() {
@@ -189,10 +153,8 @@
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.getElementById(`tab-${tabId}`).classList.add('active');
-      
       ['play', 'players', 'leaderboard'].forEach(t => {
-        const nav = document.getElementById(`nav-${t}`);
-        nav.className = t === tabId 
+        document.getElementById(`nav-${t}`).className = t === tabId 
           ? "flex flex-col items-center gap-1 text-green-400" 
           : "flex flex-col items-center gap-1 text-slate-400";
       });
@@ -203,18 +165,31 @@
       const input = document.getElementById('playerName');
       const name = input.value.trim();
       if (name) {
+        // Late arrival logic: Catch up to lowest active gamesPlayed baseline
+        const activePlayers = state.players.filter(p => p.activeStatus !== 'standby');
+        const minGamesPlayed = activePlayers.length > 0 ? Math.min(...activePlayers.map(p => p.gamesPlayed)) : 0;
+
         state.players.push({
           id: Date.now(),
           name: name,
-          gamesPlayed: 0,
+          gamesPlayed: minGamesPlayed,
           wins: 0,
           losses: 0,
-          restingRounds: 0
+          restingRounds: 100, // High priority to enter next game
+          activeStatus: 'active'
         });
         input.value = '';
         saveState();
       }
     });
+
+    function togglePlayerStatus(id) {
+      const p = state.players.find(x => x.id === id);
+      if (p) {
+        p.activeStatus = p.activeStatus === 'standby' ? 'active' : 'standby';
+        saveState();
+      }
+    }
 
     function deletePlayer(id) {
       state.players = state.players.filter(p => p.id !== id);
@@ -232,12 +207,10 @@
         state.courts.pop();
       }
 
-      const totalPlayers = state.players.length;
-      if (totalPlayers > 0) {
-        const gamesPerHourPerCourt = 4;
-        const totalGamesPossible = hours * courts * gamesPerHourPerCourt;
-        const targetPerPlayer = Math.floor((totalGamesPossible * 4) / totalPlayers);
-        
+      const activePlayers = state.players.filter(p => p.activeStatus !== 'standby').length;
+      if (activePlayers > 0) {
+        const totalGamesPossible = hours * courts * 4;
+        const targetPerPlayer = Math.floor((totalGamesPossible * 4) / activePlayers);
         document.getElementById('targetCalc').innerText = `~${targetPerPlayer} games / player`;
         document.getElementById('pacingCalc').innerText = `~15 mins / match`;
       }
@@ -245,13 +218,14 @@
     }
 
     function nextRound() {
-      const availablePlayers = [...state.players].sort((a, b) => {
+      // Filter out standby players
+      const availablePlayers = state.players.filter(p => p.activeStatus !== 'standby').sort((a, b) => {
         if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
         return b.restingRounds - a.restingRounds;
       });
 
       if (availablePlayers.length < 4) {
-        alert("Add at least 4 players to generate 2v2 matches!");
+        alert("Need at least 4 ACTIVE players to generate matches!");
         return;
       }
 
@@ -267,7 +241,7 @@
 
       const activeIds = state.courts.flatMap(c => [...c.team1, ...c.team2]).map(p => p.id);
       state.players.forEach(p => {
-        if (!activeIds.includes(p.id)) p.restingRounds++;
+        if (!activeIds.includes(p.id) && p.activeStatus !== 'standby') p.restingRounds++;
       });
 
       saveState();
@@ -297,7 +271,8 @@
     }
 
     function render() {
-      document.getElementById('sessionSummary').innerText = `${state.players.length} Players · ${state.courts.length} Court(s)`;
+      const activeCount = state.players.filter(p => p.activeStatus !== 'standby').length;
+      document.getElementById('sessionSummary').innerText = `${activeCount} Active (${state.players.length} Total) · ${state.courts.length} Court(s)`;
 
       const courtsContainer = document.getElementById('courtsContainer');
       courtsContainer.innerHTML = '';
@@ -305,24 +280,23 @@
       state.courts.forEach((court, idx) => {
         const div = document.createElement('div');
         div.className = "bg-slate-800 border border-slate-700 p-4 rounded-2xl space-y-3";
-        
         if (court.active) {
           div.innerHTML = `
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-              <span class="text-xs font-bold text-green-400 uppercase">Court ${court.id} (In Progress)</span>
+              <span class="text-xs font-bold text-green-400 uppercase">Court ${court.id}</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-center text-xs">
               <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700">
                 <span class="text-slate-400 block mb-1 text-[10px]">TEAM 1</span>
                 <span class="font-bold text-slate-200 block">${court.team1[0].name}</span>
                 <span class="font-bold text-slate-200 block">${court.team1[1].name}</span>
-                <button onclick="recordWinner(${idx}, 1)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1 rounded-lg font-bold active:bg-green-500/40">Win</button>
+                <button onclick="recordWinner(${idx}, 1)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1 rounded-lg font-bold">Win</button>
               </div>
               <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700">
                 <span class="text-slate-400 block mb-1 text-[10px]">TEAM 2</span>
                 <span class="font-bold text-slate-200 block">${court.team2[0].name}</span>
                 <span class="font-bold text-slate-200 block">${court.team2[1].name}</span>
-                <button onclick="recordWinner(${idx}, 2)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1 rounded-lg font-bold active:bg-green-500/40">Win</button>
+                <button onclick="recordWinner(${idx}, 2)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1 rounded-lg font-bold">Win</button>
               </div>
             </div>
           `;
@@ -330,7 +304,7 @@
           div.innerHTML = `
             <div class="flex justify-between items-center text-xs">
               <span class="font-bold text-slate-400">Court ${court.id}</span>
-              <span class="text-slate-500 italic">Court Empty</span>
+              <span class="text-slate-500 italic">Empty</span>
             </div>
           `;
         }
@@ -342,14 +316,15 @@
       benchList.innerHTML = '';
 
       state.players.filter(p => !activePlayerIds.includes(p.id)).forEach(p => {
+        const isStandby = p.activeStatus === 'standby';
         const card = document.createElement('div');
-        card.className = "bg-slate-800/60 border border-slate-700/60 p-2.5 rounded-xl flex justify-between items-center text-xs";
+        card.className = `p-2.5 rounded-xl flex justify-between items-center text-xs border ${isStandby ? 'bg-slate-900/50 border-slate-800 opacity-60' : 'bg-slate-800/60 border-slate-700/60'}`;
         card.innerHTML = `
           <div>
             <span class="font-bold text-slate-200 block">${p.name}</span>
-            <span class="text-[10px] text-slate-400">${p.gamesPlayed} games played</span>
+            <span class="text-[10px] text-slate-400">${p.gamesPlayed} games</span>
           </div>
-          <span class="bg-slate-700 px-2 py-0.5 rounded-full text-[10px] text-slate-300">Resting</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] ${isStandby ? 'bg-amber-900/40 text-amber-300' : 'bg-slate-700 text-slate-300'}">${isStandby ? 'AFK / Break' : 'Resting'}</span>
         `;
         benchList.appendChild(card);
       });
@@ -357,18 +332,26 @@
       const rosterList = document.getElementById('rosterList');
       rosterList.innerHTML = '';
       state.players.forEach(p => {
+        const isStandby = p.activeStatus === 'standby';
         const row = document.createElement('div');
         row.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex justify-between items-center text-xs";
         row.innerHTML = `
-          <span class="font-bold text-slate-200">${p.name}</span>
-          <button onclick="deletePlayer(${p.id})" class="text-red-400 font-bold active:opacity-50">Remove</button>
+          <div>
+            <span class="font-bold text-slate-200 block">${p.name}</span>
+            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="togglePlayerStatus(${p.id})" class="px-2.5 py-1 rounded-lg font-bold text-[10px] ${isStandby ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-green-500/20 text-green-300 border border-green-500/30'}">
+              ${isStandby ? 'Resume' : 'Pause'}
+            </button>
+            <button onclick="deletePlayer(${p.id})" class="text-red-400 font-bold px-1">✕</button>
+          </div>
         `;
         rosterList.appendChild(row);
       });
 
       const leaderboardBody = document.getElementById('leaderboardBody');
       leaderboardBody.innerHTML = '';
-      
       [...state.players].sort((a,b) => {
         const winPctA = a.gamesPlayed ? (a.wins / a.gamesPlayed) : 0;
         const winPctB = b.gamesPlayed ? (b.wins / b.gamesPlayed) : 0;
@@ -377,7 +360,7 @@
         const winPct = p.gamesPlayed ? Math.round((p.wins / p.gamesPlayed) * 100) : 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="p-3 font-bold">${p.name}</td>
+          <td class="p-3 font-bold">${p.name} ${p.activeStatus === 'standby' ? '(AFK)' : ''}</td>
           <td class="p-3 text-center text-slate-400">${p.gamesPlayed}</td>
           <td class="p-3 text-center text-slate-400">${p.wins} - ${p.losses}</td>
           <td class="p-3 text-right font-bold text-green-400">${winPct}%</td>
