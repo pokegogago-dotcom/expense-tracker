@@ -13,7 +13,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-24 font-sans select-none">
 
-  <!-- TOP HEADER WITH SVG BRANDING -->
+  <!-- HEADER -->
   <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
     <div class="flex items-center gap-3">
       <svg class="w-10 h-10 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -165,7 +165,6 @@
       const input = document.getElementById('playerName');
       const name = input.value.trim();
       if (name) {
-        // Late arrival logic: Catch up to lowest active gamesPlayed baseline
         const activePlayers = state.players.filter(p => p.activeStatus !== 'standby');
         const minGamesPlayed = activePlayers.length > 0 ? Math.min(...activePlayers.map(p => p.gamesPlayed)) : 0;
 
@@ -175,7 +174,7 @@
           gamesPlayed: minGamesPlayed,
           wins: 0,
           losses: 0,
-          restingRounds: 100, // High priority to enter next game
+          restingRounds: 100,
           activeStatus: 'active'
         });
         input.value = '';
@@ -218,7 +217,6 @@
     }
 
     function nextRound() {
-      // Filter out standby players
       const availablePlayers = state.players.filter(p => p.activeStatus !== 'standby').sort((a, b) => {
         if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
         return b.restingRounds - a.restingRounds;
@@ -247,6 +245,31 @@
       saveState();
     }
 
+    // SWAP PLAYER ON COURT LOGIC
+    function swapCourtPlayer(courtIdx, teamNum, playerIdx, newPlayerId) {
+      const targetId = parseInt(newPlayerId);
+      const newPlayerObj = state.players.find(p => p.id === targetId);
+      if (!newPlayerObj) return;
+
+      const court = state.courts[courtIdx];
+      const targetTeam = teamNum === 1 ? court.team1 : court.team2;
+
+      // Check if new player is already somewhere else on this court
+      let existingInTeam1Idx = court.team1.findIndex(p => p.id === targetId);
+      let existingInTeam2Idx = court.team2.findIndex(p => p.id === targetId);
+
+      const oldPlayerObj = targetTeam[playerIdx];
+
+      if (existingInTeam1Idx !== -1) {
+        court.team1[existingInTeam1Idx] = oldPlayerObj;
+      } else if (existingInTeam2Idx !== -1) {
+        court.team2[existingInTeam2Idx] = oldPlayerObj;
+      }
+
+      targetTeam[playerIdx] = newPlayerObj;
+      saveState();
+    }
+
     function recordWinner(courtIdx, winningTeam) {
       const court = state.courts[courtIdx];
       if (!court.active) return;
@@ -270,6 +293,14 @@
       saveState();
     }
 
+    function getPlayerSelectOptions(selectedPlayerId) {
+      return state.players.map(p => `
+        <option value="${p.id}" ${p.id === selectedPlayerId ? 'selected' : ''}>
+          ${p.name} ${p.activeStatus === 'standby' ? '(AFK)' : ''}
+        </option>
+      `).join('');
+    }
+
     function render() {
       const activeCount = state.players.filter(p => p.activeStatus !== 'standby').length;
       document.getElementById('sessionSummary').innerText = `${activeCount} Active (${state.players.length} Total) · ${state.courts.length} Court(s)`;
@@ -284,19 +315,33 @@
           div.innerHTML = `
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
               <span class="text-xs font-bold text-green-400 uppercase">Court ${court.id}</span>
+              <span class="text-[10px] text-slate-400">Tap name to swap</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-center text-xs">
-              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700">
-                <span class="text-slate-400 block mb-1 text-[10px]">TEAM 1</span>
-                <span class="font-bold text-slate-200 block">${court.team1[0].name}</span>
-                <span class="font-bold text-slate-200 block">${court.team1[1].name}</span>
-                <button onclick="recordWinner(${idx}, 1)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1 rounded-lg font-bold">Win</button>
+              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Team 1</span>
+                
+                <select onchange="swapCourtPlayer(${idx}, 1, 0, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team1[0].id)}
+                </select>
+                <select onchange="swapCourtPlayer(${idx}, 1, 1, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team1[1].id)}
+                </select>
+
+                <button onclick="recordWinner(${idx}, 1)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1.5 rounded-lg font-bold">Win</button>
               </div>
-              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700">
-                <span class="text-slate-400 block mb-1 text-[10px]">TEAM 2</span>
-                <span class="font-bold text-slate-200 block">${court.team2[0].name}</span>
-                <span class="font-bold text-slate-200 block">${court.team2[1].name}</span>
-                <button onclick="recordWinner(${idx}, 2)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1 rounded-lg font-bold">Win</button>
+
+              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Team 2</span>
+                
+                <select onchange="swapCourtPlayer(${idx}, 2, 0, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team2[0].id)}
+                </select>
+                <select onchange="swapCourtPlayer(${idx}, 2, 1, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team2[1].id)}
+                </select>
+
+                <button onclick="recordWinner(${idx}, 2)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1.5 rounded-lg font-bold">Win</button>
               </div>
             </div>
           `;
