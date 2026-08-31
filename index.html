@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Willis Pickle Watson - True Rotational Matchmaker</title>
+  <title>Pickle Watson - Pro Matchmaker & Analytics</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -46,12 +46,12 @@
     <div id="tab-play" class="tab-content active space-y-5">
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl">
-          <span class="text-slate-400 block text-[10px] uppercase">Session Target</span>
-          <span id="targetCalc" class="font-bold text-slate-200 text-sm">~0 games/player</span>
+          <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Session Target</span>
+          <span id="targetCalc" class="font-bold text-slate-100 text-sm">~0 games / player</span>
         </div>
         <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl text-right">
-          <span class="text-slate-400 block text-[10px] uppercase">Pacing Est.</span>
-          <span id="pacingCalc" class="font-bold text-green-400 text-sm">~15m / match</span>
+          <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Pacing Est.</span>
+          <span id="pacingCalc" class="font-bold text-green-400 text-sm">~15 mins / match</span>
         </div>
       </div>
 
@@ -66,30 +66,31 @@
       <section>
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Bench (Queue Pool)</h2>
-          <span id="benchCount" class="text-[11px] text-slate-400">0 Waiting</span>
+          <span id="benchCount" class="text-[11px] text-slate-400 font-semibold">0 Ready</span>
         </div>
         <div id="benchList" class="grid grid-cols-2 gap-2"></div>
       </section>
     </div>
 
-    <!-- TAB 2: PLAYERS -->
+    <!-- TAB 2: PLAYERS & SETTINGS -->
     <div id="tab-players" class="tab-content space-y-5">
       <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-4">
         <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Session Settings</h2>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs text-slate-400 block mb-1">Duration</label>
+            <label class="text-xs text-slate-400 block mb-1 font-semibold">Duration</label>
             <select id="sessionHours" onchange="updatePlanner()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none">
               <option value="1">1 Hour</option>
               <option value="2">2 Hours</option>
-              <option value="3">3 Hours</option>
+              <option value="3" selected>3 Hours</option>
               <option value="4">4 Hours</option>
+              <option value="5">5 Hours</option>
             </select>
           </div>
           <div>
-            <label class="text-xs text-slate-400 block mb-1">Courts</label>
+            <label class="text-xs text-slate-400 block mb-1 font-semibold">Courts</label>
             <select id="courtCount" onchange="updatePlanner()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none">
-              <option value="1">1 Court</option>
+              <option value="1" selected>1 Court</option>
               <option value="2">2 Courts</option>
               <option value="3">3 Courts</option>
               <option value="4">4 Courts</option>
@@ -112,10 +113,29 @@
       </section>
     </div>
 
-    <!-- TAB 3: LEADERBOARD -->
+    <!-- TAB 3: HISTORY & ANALYTICS -->
+    <div id="tab-history" class="tab-content space-y-5">
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Avg Match Time</span>
+          <span id="avgMatchDuration" class="font-bold text-slate-100 text-sm">-- mins</span>
+        </div>
+        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-right">
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Total Played</span>
+          <span id="historyMatchCount" class="font-bold text-green-400 text-sm">0 matches</span>
+        </div>
+      </div>
+
+      <section class="space-y-3">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Completed Matches Log</h2>
+        <div id="matchHistoryList" class="space-y-2.5"></div>
+      </section>
+    </div>
+
+    <!-- TAB 4: LEADERBOARD -->
     <div id="tab-leaderboard" class="tab-content space-y-4">
       <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Session Rankings</h2>
-      <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+      <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
             <tr>
@@ -125,17 +145,21 @@
               <th class="p-3 text-right">Win %</th>
             </tr>
           </thead>
-          <tbody id="leaderboardBody" class="divide-y border-slate-700/50 text-slate-200"></tbody>
+          <tbody id="leaderboardBody" class="divide-y divide-slate-700/50 text-slate-200"></tbody>
         </table>
       </div>
     </div>
   </main>
 
-  <!-- BOTTOM BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-6 py-2 flex justify-around items-center z-20">
+  <!-- BOTTOM BAR (4 TABS) -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-3 py-2 flex justify-around items-center z-20">
     <button onclick="switchTab('play')" id="nav-play" class="flex flex-col items-center gap-1 text-green-400">
       <span class="text-lg">🏸</span>
       <span class="text-[10px] font-bold">Queue</span>
+    </button>
+    <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center gap-1 text-slate-400">
+      <span class="text-lg">📜</span>
+      <span class="text-[10px] font-bold">History</span>
     </button>
     <button onclick="switchTab('players')" id="nav-players" class="flex flex-col items-center gap-1 text-slate-400">
       <span class="text-lg">👥</span>
@@ -150,17 +174,17 @@
   <script>
     const DEFAULT_STATE = {
       players: [],
-      courts: [{ id: 1, team1: [], team2: [], active: false }],
+      courts: [{ id: 1, team1: [], team2: [], active: false, startTime: null }],
       settings: { hours: 3, courtCount: 1 },
-      totalMatchesCompleted: 0,
-      courtHistory: {},   // 'idA_idB': count of games shared on same court
-      partnerHistory: {} // 'idA_idB': count of games as teammates
+      matchHistory: [],
+      courtHistory: {},
+      partnerHistory: {}
     };
 
     let state = JSON.parse(localStorage.getItem('wpw_state')) || DEFAULT_STATE;
+    if (!state.matchHistory) state.matchHistory = [];
     if (!state.courtHistory) state.courtHistory = {};
     if (!state.partnerHistory) state.partnerHistory = {};
-    if (typeof state.totalMatchesCompleted === 'undefined') state.totalMatchesCompleted = 0;
     if (!state.settings) state.settings = { hours: 3, courtCount: 1 };
 
     function saveState() {
@@ -170,10 +194,23 @@
 
     const getPlayer = (id) => state.players.find(p => p.id === Number(id));
 
+    function formatTime(isoString) {
+      if (!isoString) return '--:--';
+      const d = new Date(isoString);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDuration(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.getElementById(`tab-${tabId}`).classList.add('active');
-      ['play', 'players', 'leaderboard'].forEach(t => {
+      ['play', 'history', 'players', 'leaderboard'].forEach(t => {
         document.getElementById(`nav-${t}`).className = t === tabId 
           ? "flex flex-col items-center gap-1 text-green-400" 
           : "flex flex-col items-center gap-1 text-slate-400";
@@ -192,7 +229,6 @@
       return state.partnerHistory[getPairKey(id1, id2)] || 0;
     }
 
-    // Fisher-Yates Shuffle
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -202,7 +238,6 @@
       return arr;
     }
 
-    // Generate combinations helper
     function getCombinations(arr, k) {
       if (k === 1) return arr.map(e => [e]);
       const result = [];
@@ -250,6 +285,7 @@
             court.active = false;
             court.team1 = [];
             court.team2 = [];
+            court.startTime = null;
           }
         });
       }
@@ -263,38 +299,29 @@
           court.active = false;
           court.team1 = [];
           court.team2 = [];
+          court.startTime = null;
         }
       });
       saveState();
     }
 
     function updatePlanner() {
-      const hours = parseInt(document.getElementById('sessionHours').value);
-      const courts = parseInt(document.getElementById('courtCount').value);
+      const hours = parseInt(document.getElementById('sessionHours').value) || 3;
+      const courts = parseInt(document.getElementById('courtCount').value) || 1;
       
       state.settings.hours = hours;
       state.settings.courtCount = courts;
 
       while (state.courts.length < courts) {
-        state.courts.push({ id: state.courts.length + 1, team1: [], team2: [], active: false });
+        state.courts.push({ id: state.courts.length + 1, team1: [], team2: [], active: false, startTime: null });
       }
       while (state.courts.length > courts) {
         state.courts.pop();
       }
-
-      const activePlayers = state.players.filter(p => p.activeStatus !== 'standby').length;
-      if (activePlayers > 0) {
-        const totalGamesPossible = hours * courts * 4;
-        const targetPerPlayer = Math.floor((totalGamesPossible * 4) / activePlayers);
-        document.getElementById('targetCalc').innerText = `~${targetPerPlayer} games / player`;
-        document.getElementById('pacingCalc').innerText = `~15 mins / match`;
-      } else {
-        document.getElementById('targetCalc').innerText = `~0 games / player`;
-      }
       saveState();
     }
 
-    // TRUE ROTATIONAL / SOCIAL-GOLFER MATCHMAKING
+    // MATCHMAKER WITH TIMESTAMP
     function nextRound() {
       const currentlyOnCourtIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
       let availablePool = state.players.filter(p => p.activeStatus !== 'standby' && !currentlyOnCourtIds.includes(p.id));
@@ -312,27 +339,19 @@
 
       openCourts.forEach(court => {
         if (availablePool.length >= 4) {
-          // Sort by games played
           availablePool.sort((a, b) => a.gamesPlayed - b.gamesPlayed);
           const minGames = availablePool[0].gamesPlayed;
 
-          // Expand candidate pool to include players with minGames or minGames + 1 to allow mixing
           let candidatePool = availablePool.filter(p => p.gamesPlayed <= minGames + 1);
-          
-          // If we have fewer than 4 candidates in this tier, expand to full pool
           if (candidatePool.length < 4) {
             candidatePool = [...availablePool];
           }
 
-          // Generate all 4-player combinations from candidate pool
-          // Cap pool size at 12 to prevent combination explosion
           const samplePool = candidatePool.slice(0, 10);
           const allCombos = getCombinations(samplePool, 4);
 
-          // Score each combination by history of playing together on same court
           let scoredCombos = allCombos.map(combo => {
             let score = 0;
-            // 6 pairs in a group of 4
             score += getCourtHistory(combo[0].id, combo[1].id);
             score += getCourtHistory(combo[0].id, combo[2].id);
             score += getCourtHistory(combo[0].id, combo[3].id);
@@ -340,23 +359,17 @@
             score += getCourtHistory(combo[1].id, combo[3].id);
             score += getCourtHistory(combo[2].id, combo[3].id);
 
-            // Add minor weight for games played disparity
             const gamesSum = combo.reduce((sum, p) => sum + (p.gamesPlayed - minGames), 0);
             score += gamesSum * 2;
-
             return { combo, score };
           });
 
-          // Shuffle before sorting to ensure random picks during ties
           scoredCombos = shuffleArray(scoredCombos);
           scoredCombos.sort((a, b) => a.score - b.score);
 
           const bestMatch = scoredCombos[0].combo;
-
-          // Remove selected players from available pool for next courts
           availablePool = availablePool.filter(p => !bestMatch.some(sel => sel.id === p.id));
 
-          // Now find the best 2v2 split that minimizes partner repeat
           const p = bestMatch;
           const pairings = [
             { t1: [p[0], p[1]], t2: [p[2], p[3]], score: getPartnerHistory(p[0].id, p[1].id) + getPartnerHistory(p[2].id, p[3].id) },
@@ -369,6 +382,7 @@
           court.team1 = [bestPairing.t1[0].id, bestPairing.t1[1].id];
           court.team2 = [bestPairing.t2[0].id, bestPairing.t2[1].id];
           court.active = true;
+          court.startTime = new Date().toISOString(); // Match timestamp started
         }
       });
 
@@ -386,23 +400,25 @@
       const inT1 = court.team1.indexOf(targetId);
       const inT2 = court.team2.indexOf(targetId);
 
-      if (inT1 !== -1) {
-        court.team1[inT1] = oldPlayerId;
-      } else if (inT2 !== -1) {
-        court.team2[inT2] = oldPlayerId;
-      }
+      if (inT1 !== -1) court.team1[inT1] = oldPlayerId;
+      else if (inT2 !== -1) court.team2[inT2] = oldPlayerId;
 
       targetTeam[slotIdx] = targetId;
       saveState();
     }
 
+    // RECORD MATCH WINNER WITH FULL ANALYTICS
     function recordWinner(courtIdx, winningTeam) {
       const court = state.courts[courtIdx];
       if (!court.active) return;
 
+      const endTime = new Date().toISOString();
+      const startTime = court.startTime || endTime;
+      const durationMs = new Date(endTime) - new Date(startTime);
+
       const allFour = [...court.team1, ...court.team2];
 
-      // Update Court Sharing Matrix
+      // Update Shared Matrix
       for (let i = 0; i < allFour.length; i++) {
         for (let j = i + 1; j < allFour.length; j++) {
           const key = getPairKey(allFour[i], allFour[j]);
@@ -429,10 +445,22 @@
         if (p) { p.losses++; p.gamesPlayed++; }
       });
 
-      state.totalMatchesCompleted++;
+      // Save match to History Log
+      state.matchHistory.unshift({
+        matchNumber: state.matchHistory.length + 1,
+        courtId: court.id,
+        team1: [getPlayer(court.team1[0])?.name || '?', getPlayer(court.team1[1])?.name || '?'],
+        team2: [getPlayer(court.team2[0])?.name || '?', getPlayer(court.team2[1])?.name || '?'],
+        winner: winningTeam,
+        startTime: startTime,
+        endTime: endTime,
+        durationMs: durationMs > 0 ? durationMs : 0
+      });
+
       court.active = false;
       court.team1 = [];
       court.team2 = [];
+      court.startTime = null;
       saveState();
     }
 
@@ -445,13 +473,25 @@
     }
 
     function render() {
+      // Sync dropdowns
       document.getElementById('sessionHours').value = state.settings.hours;
       document.getElementById('courtCount').value = state.settings.courtCount;
 
       const activePlayers = state.players.filter(p => p.activeStatus !== 'standby');
       document.getElementById('sessionSummary').innerText = `${activePlayers.length} Active (${state.players.length} Roster) · ${state.courts.length} Court(s)`;
-      document.getElementById('roundsBadge').innerText = `${state.totalMatchesCompleted} Matches`;
+      document.getElementById('roundsBadge').innerText = `${state.matchHistory.length} Matches`;
 
+      // Recalculate target dynamically: (hours * courts * 4 matches/hr * 4 slots) / active_players
+      if (activePlayers.length > 0) {
+        const totalMatchesPossible = state.settings.hours * state.settings.courtCount * 4;
+        const targetPerPlayer = ((totalMatchesPossible * 4) / activePlayers.length).toFixed(1);
+        document.getElementById('targetCalc').innerText = `~${targetPerPlayer} games / player`;
+        document.getElementById('pacingCalc').innerText = `~15 mins / match`;
+      } else {
+        document.getElementById('targetCalc').innerText = `~0 games / player`;
+      }
+
+      // Courts Render
       const courtsContainer = document.getElementById('courtsContainer');
       courtsContainer.innerHTML = '';
       
@@ -461,8 +501,11 @@
         if (court.active && court.team1.length === 2 && court.team2.length === 2) {
           div.innerHTML = `
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-              <span class="text-xs font-bold text-green-400 uppercase tracking-wider">Court ${court.id} (Playing)</span>
-              <span class="text-[10px] text-slate-400">Tap name to swap</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-green-400 uppercase tracking-wider">Court ${court.id} (Playing)</span>
+                <span class="text-[10px] bg-slate-900 border border-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Started ${formatTime(court.startTime)}</span>
+              </div>
+              <span class="text-[10px] text-slate-400">Tap to swap</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-center text-xs">
               <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
@@ -503,6 +546,7 @@
         courtsContainer.appendChild(div);
       });
 
+      // Bench Pool Render
       const activeCourtIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
       const benchList = document.getElementById('benchList');
       benchList.innerHTML = '';
@@ -533,6 +577,49 @@
         benchList.appendChild(card);
       });
 
+      // Match History Render
+      const historyList = document.getElementById('matchHistoryList');
+      historyList.innerHTML = '';
+      document.getElementById('historyMatchCount').innerText = `${state.matchHistory.length} matches`;
+
+      if (state.matchHistory.length > 0) {
+        const totalDuration = state.matchHistory.reduce((sum, m) => sum + (m.durationMs || 0), 0);
+        const avgDurationMs = totalDuration / state.matchHistory.length;
+        document.getElementById('avgMatchDuration').innerText = formatDuration(avgDurationMs);
+      } else {
+        document.getElementById('avgMatchDuration').innerText = '-- mins';
+        historyList.innerHTML = '<div class="text-xs text-slate-500 italic text-center py-6">No completed matches yet. Complete a match to see duration & timestamps.</div>';
+      }
+
+      state.matchHistory.forEach(m => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl text-xs space-y-2";
+        card.innerHTML = `
+          <div class="flex justify-between items-center border-b border-slate-700/50 pb-1.5">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-green-400">Match #${m.matchNumber}</span>
+              <span class="text-[10px] text-slate-400">· Court ${m.courtId}</span>
+            </div>
+            <div class="text-[10px] text-slate-400">
+              <span>${formatTime(m.startTime)} - ${formatTime(m.endTime)}</span>
+              <span class="font-bold text-slate-200 ml-1">(${formatDuration(m.durationMs)})</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-center">
+            <div class="p-1.5 rounded-lg border ${m.winner === 1 ? 'bg-green-950/40 border-green-500/40 text-green-300 font-bold' : 'bg-slate-900/40 border-slate-700 text-slate-400'}">
+              <div class="text-[9px] uppercase">${m.winner === 1 ? '🏆 Winner' : 'Team 1'}</div>
+              <div>${m.team1[0]} & ${m.team1[1]}</div>
+            </div>
+            <div class="p-1.5 rounded-lg border ${m.winner === 2 ? 'bg-green-950/40 border-green-500/40 text-green-300 font-bold' : 'bg-slate-900/40 border-slate-700 text-slate-400'}">
+              <div class="text-[9px] uppercase">${m.winner === 2 ? '🏆 Winner' : 'Team 2'}</div>
+              <div>${m.team2[0]} & ${m.team2[1]}</div>
+            </div>
+          </div>
+        `;
+        historyList.appendChild(card);
+      });
+
+      // Roster Render
       const rosterList = document.getElementById('rosterList');
       rosterList.innerHTML = '';
       state.players.forEach(p => {
@@ -554,6 +641,7 @@
         rosterList.appendChild(row);
       });
 
+      // Leaderboard Render
       const leaderboardBody = document.getElementById('leaderboardBody');
       leaderboardBody.innerHTML = '';
       
@@ -582,7 +670,7 @@
     }
 
     function resetSession() {
-      if (confirm("Reset scores and match history? (Roster will be preserved)")) {
+      if (confirm("Reset scores, match history, and timestamps? (Player roster will be preserved)")) {
         state.players.forEach(p => { 
           p.gamesPlayed = 0; 
           p.wins = 0; 
@@ -592,8 +680,9 @@
           c.active = false; 
           c.team1 = []; 
           c.team2 = []; 
+          c.startTime = null;
         });
-        state.totalMatchesCompleted = 0;
+        state.matchHistory = [];
         state.courtHistory = {};
         state.partnerHistory = {};
         saveState();
