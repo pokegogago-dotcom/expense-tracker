@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Willis Pickle Watson</title>
+  <title>Willis Pickle Watson - True Rotational Matchmaker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -30,38 +30,44 @@
         <path d="M63 56 Q68 62 70 72" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
       </svg>
       <div>
-        <h1 class="text-base font-black tracking-wider text-green-400 uppercase leading-none">Willis Pickle Watson</h1>
+        <h1 class="text-base font-black tracking-wider text-green-400 uppercase leading-none">Pickle Watson</h1>
         <p id="sessionSummary" class="text-[11px] text-slate-400 mt-1">0 Active · 1 Court</p>
       </div>
     </div>
-    <button onclick="resetSession()" class="text-xs bg-red-900/40 text-red-300 border border-red-700/50 px-3 py-1.5 rounded-lg active:bg-red-800">Reset</button>
+    <div class="flex items-center gap-2">
+      <span id="roundsBadge" class="text-xs bg-slate-700 text-green-300 font-bold px-2 py-1 rounded-lg border border-slate-600">0 Matches</span>
+      <button onclick="resetSession()" class="text-xs bg-red-900/40 text-red-300 border border-red-700/50 px-2.5 py-1 rounded-lg active:bg-red-800">Reset</button>
+    </div>
   </header>
 
   <main class="p-4 max-w-md mx-auto space-y-5">
 
     <!-- TAB 1: QUEUE -->
     <div id="tab-play" class="tab-content active space-y-5">
-      <div class="bg-slate-800/80 border border-slate-700 p-3.5 rounded-2xl flex justify-between items-center text-xs">
-        <div>
-          <span class="text-slate-400 block">Session Target</span>
-          <span id="targetCalc" class="font-bold text-slate-200">~0 games / player</span>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl">
+          <span class="text-slate-400 block text-[10px] uppercase">Session Target</span>
+          <span id="targetCalc" class="font-bold text-slate-200 text-sm">~0 games/player</span>
         </div>
-        <div class="text-right">
-          <span class="text-slate-400 block">Pacing</span>
-          <span id="pacingCalc" class="font-bold text-green-400">0 mins / game</span>
+        <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl text-right">
+          <span class="text-slate-400 block text-[10px] uppercase">Pacing Est.</span>
+          <span id="pacingCalc" class="font-bold text-green-400 text-sm">~15m / match</span>
         </div>
       </div>
 
       <section>
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Active Courts</h2>
-          <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">⚡ Deduce Matches</button>
+          <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">🎲 Auto Matchmake</button>
         </div>
         <div id="courtsContainer" class="space-y-3"></div>
       </section>
 
       <section>
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">Bench / Queue</h2>
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Bench (Queue Pool)</h2>
+          <span id="benchCount" class="text-[11px] text-slate-400">0 Waiting</span>
+        </div>
         <div id="benchList" class="grid grid-cols-2 gap-2"></div>
       </section>
     </div>
@@ -76,16 +82,17 @@
             <select id="sessionHours" onchange="updatePlanner()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none">
               <option value="1">1 Hour</option>
               <option value="2">2 Hours</option>
-              <option value="3" selected>3 Hours</option>
+              <option value="3">3 Hours</option>
               <option value="4">4 Hours</option>
             </select>
           </div>
           <div>
             <label class="text-xs text-slate-400 block mb-1">Courts</label>
             <select id="courtCount" onchange="updatePlanner()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none">
-              <option value="1" selected>1 Court</option>
+              <option value="1">1 Court</option>
               <option value="2">2 Courts</option>
               <option value="3">3 Courts</option>
+              <option value="4">4 Courts</option>
             </select>
           </div>
         </div>
@@ -94,7 +101,7 @@
       <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
         <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Add Player</h2>
         <form id="addPlayerForm" class="flex gap-2">
-          <input type="text" id="playerName" placeholder="Player name..." required class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-green-400">
+          <input type="text" id="playerName" placeholder="Player name..." autocomplete="off" autocapitalize="words" required class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-green-400">
           <button type="submit" class="bg-green-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs active:scale-95">Add</button>
         </form>
       </section>
@@ -107,26 +114,27 @@
 
     <!-- TAB 3: LEADERBOARD -->
     <div id="tab-leaderboard" class="tab-content space-y-4">
-      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Leaderboard</h2>
+      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Session Rankings</h2>
       <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
             <tr>
-              <th class="p-3">Player</th>
+              <th class="p-3"># & Player</th>
               <th class="p-3 text-center">Played</th>
               <th class="p-3 text-center">W - L</th>
               <th class="p-3 text-right">Win %</th>
             </tr>
           </thead>
-          <tbody id="leaderboardBody" class="divide-y divide-slate-700/50 text-slate-200"></tbody>
+          <tbody id="leaderboardBody" class="divide-y border-slate-700/50 text-slate-200"></tbody>
         </table>
       </div>
     </div>
   </main>
 
+  <!-- BOTTOM BAR -->
   <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-6 py-2 flex justify-around items-center z-20">
     <button onclick="switchTab('play')" id="nav-play" class="flex flex-col items-center gap-1 text-green-400">
-      <span class="text-lg">🔎</span>
+      <span class="text-lg">🏸</span>
       <span class="text-[10px] font-bold">Queue</span>
     </button>
     <button onclick="switchTab('players')" id="nav-players" class="flex flex-col items-center gap-1 text-slate-400">
@@ -140,15 +148,27 @@
   </nav>
 
   <script>
-    let state = JSON.parse(localStorage.getItem('wpw_state')) || {
+    const DEFAULT_STATE = {
       players: [],
-      courts: [{ id: 1, team1: [], team2: [], active: false }]
+      courts: [{ id: 1, team1: [], team2: [], active: false }],
+      settings: { hours: 3, courtCount: 1 },
+      totalMatchesCompleted: 0,
+      courtHistory: {},   // 'idA_idB': count of games shared on same court
+      partnerHistory: {} // 'idA_idB': count of games as teammates
     };
+
+    let state = JSON.parse(localStorage.getItem('wpw_state')) || DEFAULT_STATE;
+    if (!state.courtHistory) state.courtHistory = {};
+    if (!state.partnerHistory) state.partnerHistory = {};
+    if (typeof state.totalMatchesCompleted === 'undefined') state.totalMatchesCompleted = 0;
+    if (!state.settings) state.settings = { hours: 3, courtCount: 1 };
 
     function saveState() {
       localStorage.setItem('wpw_state', JSON.stringify(state));
       render();
     }
+
+    const getPlayer = (id) => state.players.find(p => p.id === Number(id));
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -160,6 +180,43 @@
       });
     }
 
+    function getPairKey(id1, id2) {
+      return [Number(id1), Number(id2)].sort((a,b) => a - b).join('_');
+    }
+
+    function getCourtHistory(id1, id2) {
+      return state.courtHistory[getPairKey(id1, id2)] || 0;
+    }
+
+    function getPartnerHistory(id1, id2) {
+      return state.partnerHistory[getPairKey(id1, id2)] || 0;
+    }
+
+    // Fisher-Yates Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Generate combinations helper
+    function getCombinations(arr, k) {
+      if (k === 1) return arr.map(e => [e]);
+      const result = [];
+      for (let i = 0; i <= arr.length - k; i++) {
+        const head = arr[i];
+        const tailCombos = getCombinations(arr.slice(i + 1), k - 1);
+        for (const tail of tailCombos) {
+          result.push([head, ...tail]);
+        }
+      }
+      return result;
+    }
+
+    // FORM: Add Player
     document.getElementById('addPlayerForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const input = document.getElementById('playerName');
@@ -174,7 +231,6 @@
           gamesPlayed: minGamesPlayed,
           wins: 0,
           losses: 0,
-          restingRounds: 100,
           activeStatus: 'active'
         });
         input.value = '';
@@ -183,15 +239,32 @@
     });
 
     function togglePlayerStatus(id) {
-      const p = state.players.find(x => x.id === id);
-      if (p) {
-        p.activeStatus = p.activeStatus === 'standby' ? 'active' : 'standby';
-        saveState();
+      const p = getPlayer(id);
+      if (!p) return;
+      
+      p.activeStatus = p.activeStatus === 'standby' ? 'active' : 'standby';
+      
+      if (p.activeStatus === 'standby') {
+        state.courts.forEach(court => {
+          if (court.team1.includes(id) || court.team2.includes(id)) {
+            court.active = false;
+            court.team1 = [];
+            court.team2 = [];
+          }
+        });
       }
+      saveState();
     }
 
     function deletePlayer(id) {
       state.players = state.players.filter(p => p.id !== id);
+      state.courts.forEach(court => {
+        if (court.team1.includes(id) || court.team2.includes(id)) {
+          court.active = false;
+          court.team1 = [];
+          court.team2 = [];
+        }
+      });
       saveState();
     }
 
@@ -199,10 +272,13 @@
       const hours = parseInt(document.getElementById('sessionHours').value);
       const courts = parseInt(document.getElementById('courtCount').value);
       
-      while(state.courts.length < courts) {
+      state.settings.hours = hours;
+      state.settings.courtCount = courts;
+
+      while (state.courts.length < courts) {
         state.courts.push({ id: state.courts.length + 1, team1: [], team2: [], active: false });
       }
-      while(state.courts.length > courts) {
+      while (state.courts.length > courts) {
         state.courts.pop();
       }
 
@@ -212,61 +288,111 @@
         const targetPerPlayer = Math.floor((totalGamesPossible * 4) / activePlayers);
         document.getElementById('targetCalc').innerText = `~${targetPerPlayer} games / player`;
         document.getElementById('pacingCalc').innerText = `~15 mins / match`;
+      } else {
+        document.getElementById('targetCalc').innerText = `~0 games / player`;
       }
       saveState();
     }
 
+    // TRUE ROTATIONAL / SOCIAL-GOLFER MATCHMAKING
     function nextRound() {
-      const availablePlayers = state.players.filter(p => p.activeStatus !== 'standby').sort((a, b) => {
-        if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
-        return b.restingRounds - a.restingRounds;
-      });
+      const currentlyOnCourtIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
+      let availablePool = state.players.filter(p => p.activeStatus !== 'standby' && !currentlyOnCourtIds.includes(p.id));
+      const openCourts = state.courts.filter(c => !c.active);
 
-      if (availablePlayers.length < 4) {
-        alert("Need at least 4 ACTIVE players to generate matches!");
+      if (openCourts.length === 0) {
+        alert("All courts are currently active!");
         return;
       }
 
-      state.courts.forEach((court) => {
-        const pool = availablePlayers.splice(0, 4);
-        if (pool.length === 4) {
-          pool.sort(() => Math.random() - 0.5);
-          court.team1 = [pool[0], pool[1]];
-          court.team2 = [pool[2], pool[3]];
+      if (availablePool.length < 4) {
+        alert("Need at least 4 available players on the bench!");
+        return;
+      }
+
+      openCourts.forEach(court => {
+        if (availablePool.length >= 4) {
+          // Sort by games played
+          availablePool.sort((a, b) => a.gamesPlayed - b.gamesPlayed);
+          const minGames = availablePool[0].gamesPlayed;
+
+          // Expand candidate pool to include players with minGames or minGames + 1 to allow mixing
+          let candidatePool = availablePool.filter(p => p.gamesPlayed <= minGames + 1);
+          
+          // If we have fewer than 4 candidates in this tier, expand to full pool
+          if (candidatePool.length < 4) {
+            candidatePool = [...availablePool];
+          }
+
+          // Generate all 4-player combinations from candidate pool
+          // Cap pool size at 12 to prevent combination explosion
+          const samplePool = candidatePool.slice(0, 10);
+          const allCombos = getCombinations(samplePool, 4);
+
+          // Score each combination by history of playing together on same court
+          let scoredCombos = allCombos.map(combo => {
+            let score = 0;
+            // 6 pairs in a group of 4
+            score += getCourtHistory(combo[0].id, combo[1].id);
+            score += getCourtHistory(combo[0].id, combo[2].id);
+            score += getCourtHistory(combo[0].id, combo[3].id);
+            score += getCourtHistory(combo[1].id, combo[2].id);
+            score += getCourtHistory(combo[1].id, combo[3].id);
+            score += getCourtHistory(combo[2].id, combo[3].id);
+
+            // Add minor weight for games played disparity
+            const gamesSum = combo.reduce((sum, p) => sum + (p.gamesPlayed - minGames), 0);
+            score += gamesSum * 2;
+
+            return { combo, score };
+          });
+
+          // Shuffle before sorting to ensure random picks during ties
+          scoredCombos = shuffleArray(scoredCombos);
+          scoredCombos.sort((a, b) => a.score - b.score);
+
+          const bestMatch = scoredCombos[0].combo;
+
+          // Remove selected players from available pool for next courts
+          availablePool = availablePool.filter(p => !bestMatch.some(sel => sel.id === p.id));
+
+          // Now find the best 2v2 split that minimizes partner repeat
+          const p = bestMatch;
+          const pairings = [
+            { t1: [p[0], p[1]], t2: [p[2], p[3]], score: getPartnerHistory(p[0].id, p[1].id) + getPartnerHistory(p[2].id, p[3].id) },
+            { t1: [p[0], p[2]], t2: [p[1], p[3]], score: getPartnerHistory(p[0].id, p[2].id) + getPartnerHistory(p[1].id, p[3].id) },
+            { t1: [p[0], p[3]], t2: [p[1], p[2]], score: getPartnerHistory(p[0].id, p[3].id) + getPartnerHistory(p[1].id, p[2].id) }
+          ];
+
+          const bestPairing = shuffleArray(pairings).sort((a, b) => a.score - b.score)[0];
+
+          court.team1 = [bestPairing.t1[0].id, bestPairing.t1[1].id];
+          court.team2 = [bestPairing.t2[0].id, bestPairing.t2[1].id];
           court.active = true;
         }
       });
 
-      const activeIds = state.courts.flatMap(c => [...c.team1, ...c.team2]).map(p => p.id);
-      state.players.forEach(p => {
-        if (!activeIds.includes(p.id) && p.activeStatus !== 'standby') p.restingRounds++;
-      });
-
       saveState();
     }
 
-    // SWAP PLAYER ON COURT LOGIC
-    function swapCourtPlayer(courtIdx, teamNum, playerIdx, newPlayerId) {
-      const targetId = parseInt(newPlayerId);
-      const newPlayerObj = state.players.find(p => p.id === targetId);
-      if (!newPlayerObj) return;
-
+    function swapCourtPlayer(courtIdx, teamNum, slotIdx, newPlayerId) {
+      const targetId = Number(newPlayerId);
       const court = state.courts[courtIdx];
       const targetTeam = teamNum === 1 ? court.team1 : court.team2;
+      const oldPlayerId = targetTeam[slotIdx];
 
-      // Check if new player is already somewhere else on this court
-      let existingInTeam1Idx = court.team1.findIndex(p => p.id === targetId);
-      let existingInTeam2Idx = court.team2.findIndex(p => p.id === targetId);
+      if (oldPlayerId === targetId) return;
 
-      const oldPlayerObj = targetTeam[playerIdx];
+      const inT1 = court.team1.indexOf(targetId);
+      const inT2 = court.team2.indexOf(targetId);
 
-      if (existingInTeam1Idx !== -1) {
-        court.team1[existingInTeam1Idx] = oldPlayerObj;
-      } else if (existingInTeam2Idx !== -1) {
-        court.team2[existingInTeam2Idx] = oldPlayerObj;
+      if (inT1 !== -1) {
+        court.team1[inT1] = oldPlayerId;
+      } else if (inT2 !== -1) {
+        court.team2[inT2] = oldPlayerId;
       }
 
-      targetTeam[playerIdx] = newPlayerObj;
+      targetTeam[slotIdx] = targetId;
       saveState();
     }
 
@@ -274,102 +400,135 @@
       const court = state.courts[courtIdx];
       if (!court.active) return;
 
+      const allFour = [...court.team1, ...court.team2];
+
+      // Update Court Sharing Matrix
+      for (let i = 0; i < allFour.length; i++) {
+        for (let j = i + 1; j < allFour.length; j++) {
+          const key = getPairKey(allFour[i], allFour[j]);
+          state.courtHistory[key] = (state.courtHistory[key] || 0) + 1;
+        }
+      }
+
+      // Update Teammate Matrix
+      const t1Key = getPairKey(court.team1[0], court.team1[1]);
+      const t2Key = getPairKey(court.team2[0], court.team2[1]);
+      state.partnerHistory[t1Key] = (state.partnerHistory[t1Key] || 0) + 1;
+      state.partnerHistory[t2Key] = (state.partnerHistory[t2Key] || 0) + 1;
+
       const winners = winningTeam === 1 ? court.team1 : court.team2;
       const losers = winningTeam === 1 ? court.team2 : court.team1;
 
-      winners.forEach(w => {
-        const p = state.players.find(x => x.id === w.id);
-        if (p) { p.wins++; p.gamesPlayed++; p.restingRounds = 0; }
+      winners.forEach(id => {
+        const p = getPlayer(id);
+        if (p) { p.wins++; p.gamesPlayed++; }
       });
 
-      losers.forEach(l => {
-        const p = state.players.find(x => x.id === l.id);
-        if (p) { p.losses++; p.gamesPlayed++; p.restingRounds = 0; }
+      losers.forEach(id => {
+        const p = getPlayer(id);
+        if (p) { p.losses++; p.gamesPlayed++; }
       });
 
+      state.totalMatchesCompleted++;
       court.active = false;
       court.team1 = [];
       court.team2 = [];
       saveState();
     }
 
-    function getPlayerSelectOptions(selectedPlayerId) {
+    function getPlayerSelectOptions(selectedId) {
       return state.players.map(p => `
-        <option value="${p.id}" ${p.id === selectedPlayerId ? 'selected' : ''}>
-          ${p.name} ${p.activeStatus === 'standby' ? '(AFK)' : ''}
+        <option value="${p.id}" ${p.id === selectedId ? 'selected' : ''}>
+          ${p.name} (${p.gamesPlayed}G) ${p.activeStatus === 'standby' ? '⏸' : ''}
         </option>
       `).join('');
     }
 
     function render() {
-      const activeCount = state.players.filter(p => p.activeStatus !== 'standby').length;
-      document.getElementById('sessionSummary').innerText = `${activeCount} Active (${state.players.length} Total) · ${state.courts.length} Court(s)`;
+      document.getElementById('sessionHours').value = state.settings.hours;
+      document.getElementById('courtCount').value = state.settings.courtCount;
+
+      const activePlayers = state.players.filter(p => p.activeStatus !== 'standby');
+      document.getElementById('sessionSummary').innerText = `${activePlayers.length} Active (${state.players.length} Roster) · ${state.courts.length} Court(s)`;
+      document.getElementById('roundsBadge').innerText = `${state.totalMatchesCompleted} Matches`;
 
       const courtsContainer = document.getElementById('courtsContainer');
       courtsContainer.innerHTML = '';
       
       state.courts.forEach((court, idx) => {
         const div = document.createElement('div');
-        div.className = "bg-slate-800 border border-slate-700 p-4 rounded-2xl space-y-3";
-        if (court.active) {
+        div.className = "bg-slate-800 border border-slate-700 p-4 rounded-2xl space-y-3 shadow-sm";
+        if (court.active && court.team1.length === 2 && court.team2.length === 2) {
           div.innerHTML = `
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-              <span class="text-xs font-bold text-green-400 uppercase">Court ${court.id}</span>
+              <span class="text-xs font-bold text-green-400 uppercase tracking-wider">Court ${court.id} (Playing)</span>
               <span class="text-[10px] text-slate-400">Tap name to swap</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-center text-xs">
               <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
-                <span class="text-slate-400 block text-[10px] uppercase font-bold">Team 1</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Team 1</span>
                 
-                <select onchange="swapCourtPlayer(${idx}, 1, 0, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
-                  ${getPlayerSelectOptions(court.team1[0].id)}
+                <select onchange="swapCourtPlayer(${idx}, 1, 0, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team1[0])}
                 </select>
-                <select onchange="swapCourtPlayer(${idx}, 1, 1, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
-                  ${getPlayerSelectOptions(court.team1[1].id)}
+                <select onchange="swapCourtPlayer(${idx}, 1, 1, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team1[1])}
                 </select>
 
-                <button onclick="recordWinner(${idx}, 1)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1.5 rounded-lg font-bold">Win</button>
+                <button onclick="recordWinner(${idx}, 1)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1.5 rounded-lg font-bold hover:bg-green-500/30 active:scale-95 transition">Team 1 Won</button>
               </div>
 
               <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
-                <span class="text-slate-400 block text-[10px] uppercase font-bold">Team 2</span>
+                <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Team 2</span>
                 
-                <select onchange="swapCourtPlayer(${idx}, 2, 0, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
-                  ${getPlayerSelectOptions(court.team2[0].id)}
+                <select onchange="swapCourtPlayer(${idx}, 2, 0, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team2[0])}
                 </select>
-                <select onchange="swapCourtPlayer(${idx}, 2, 1, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs text-center font-bold outline-none">
-                  ${getPlayerSelectOptions(court.team2[1].id)}
+                <select onchange="swapCourtPlayer(${idx}, 2, 1, this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs font-bold outline-none">
+                  ${getPlayerSelectOptions(court.team2[1])}
                 </select>
 
-                <button onclick="recordWinner(${idx}, 2)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1.5 rounded-lg font-bold">Win</button>
+                <button onclick="recordWinner(${idx}, 2)" class="mt-2 w-full bg-green-500/20 text-green-300 border border-green-500/40 py-1.5 rounded-lg font-bold hover:bg-green-500/30 active:scale-95 transition">Team 2 Won</button>
               </div>
             </div>
           `;
         } else {
           div.innerHTML = `
-            <div class="flex justify-between items-center text-xs">
-              <span class="font-bold text-slate-400">Court ${court.id}</span>
-              <span class="text-slate-500 italic">Empty</span>
+            <div class="flex justify-between items-center text-xs py-1">
+              <span class="font-bold text-slate-400 uppercase tracking-wider">Court ${court.id}</span>
+              <span class="text-slate-500 italic bg-slate-900/50 px-2.5 py-0.5 rounded-md border border-slate-800">Available</span>
             </div>
           `;
         }
         courtsContainer.appendChild(div);
       });
 
-      const activePlayerIds = state.courts.flatMap(c => [...c.team1, ...c.team2]).map(p => p.id);
+      const activeCourtIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
       const benchList = document.getElementById('benchList');
       benchList.innerHTML = '';
 
-      state.players.filter(p => !activePlayerIds.includes(p.id)).forEach(p => {
+      const waitingPlayers = state.players
+        .filter(p => !activeCourtIds.includes(p.id))
+        .sort((a, b) => {
+          if (a.activeStatus === 'standby' && b.activeStatus !== 'standby') return 1;
+          if (b.activeStatus === 'standby' && a.activeStatus !== 'standby') return -1;
+          return a.gamesPlayed - b.gamesPlayed;
+        });
+
+      document.getElementById('benchCount').innerText = `${waitingPlayers.filter(p => p.activeStatus !== 'standby').length} Ready`;
+
+      waitingPlayers.forEach(p => {
         const isStandby = p.activeStatus === 'standby';
         const card = document.createElement('div');
-        card.className = `p-2.5 rounded-xl flex justify-between items-center text-xs border ${isStandby ? 'bg-slate-900/50 border-slate-800 opacity-60' : 'bg-slate-800/60 border-slate-700/60'}`;
+        card.className = `p-2.5 rounded-xl flex justify-between items-center text-xs border ${isStandby ? 'bg-slate-900/50 border-slate-800 opacity-50' : 'bg-slate-800/80 border-slate-700/80'}`;
         card.innerHTML = `
           <div>
             <span class="font-bold text-slate-200 block">${p.name}</span>
-            <span class="text-[10px] text-slate-400">${p.gamesPlayed} games</span>
+            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played</span>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] ${isStandby ? 'bg-amber-900/40 text-amber-300' : 'bg-slate-700 text-slate-300'}">${isStandby ? 'AFK / Break' : 'Resting'}</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${isStandby ? 'bg-amber-900/40 text-amber-300 border border-amber-800/50' : 'bg-slate-700 text-slate-300'}">
+            ${isStandby ? 'AFK' : 'Resting'}
+          </span>
         `;
         benchList.appendChild(card);
       });
@@ -383,13 +542,13 @@
         row.innerHTML = `
           <div>
             <span class="font-bold text-slate-200 block">${p.name}</span>
-            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played</span>
+            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played (${p.wins}W - ${p.losses}L)</span>
           </div>
           <div class="flex gap-2">
-            <button onclick="togglePlayerStatus(${p.id})" class="px-2.5 py-1 rounded-lg font-bold text-[10px] ${isStandby ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-green-500/20 text-green-300 border border-green-500/30'}">
+            <button onclick="togglePlayerStatus(${p.id})" class="px-2.5 py-1 rounded-lg font-bold text-[10px] transition ${isStandby ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-700 text-slate-300'}">
               ${isStandby ? 'Resume' : 'Pause'}
             </button>
-            <button onclick="deletePlayer(${p.id})" class="text-red-400 font-bold px-1">✕</button>
+            <button onclick="deletePlayer(${p.id})" class="text-red-400 hover:text-red-300 font-bold px-1.5">✕</button>
           </div>
         `;
         rosterList.appendChild(row);
@@ -397,27 +556,46 @@
 
       const leaderboardBody = document.getElementById('leaderboardBody');
       leaderboardBody.innerHTML = '';
-      [...state.players].sort((a,b) => {
+      
+      const rankedPlayers = [...state.players].sort((a,b) => {
         const winPctA = a.gamesPlayed ? (a.wins / a.gamesPlayed) : 0;
         const winPctB = b.gamesPlayed ? (b.wins / b.gamesPlayed) : 0;
+        if (b.wins !== a.wins) return b.wins - a.wins;
         return winPctB - winPctA;
-      }).forEach(p => {
+      });
+
+      rankedPlayers.forEach((p, rankIdx) => {
         const winPct = p.gamesPlayed ? Math.round((p.wins / p.gamesPlayed) * 100) : 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="p-3 font-bold">${p.name} ${p.activeStatus === 'standby' ? '(AFK)' : ''}</td>
-          <td class="p-3 text-center text-slate-400">${p.gamesPlayed}</td>
-          <td class="p-3 text-center text-slate-400">${p.wins} - ${p.losses}</td>
-          <td class="p-3 text-right font-bold text-green-400">${winPct}%</td>
+          <td class="p-3">
+            <span class="text-slate-500 font-mono mr-1.5">${rankIdx + 1}.</span>
+            <span class="font-bold text-slate-100">${p.name}</span>
+            ${p.activeStatus === 'standby' ? '<span class="text-[9px] text-amber-400 ml-1">(AFK)</span>' : ''}
+          </td>
+          <td class="p-3 text-center text-slate-400 font-mono">${p.gamesPlayed}</td>
+          <td class="p-3 text-center text-slate-300 font-mono">${p.wins} - ${p.losses}</td>
+          <td class="p-3 text-right font-bold font-mono ${winPct >= 50 ? 'text-green-400' : 'text-slate-400'}">${winPct}%</td>
         `;
         leaderboardBody.appendChild(tr);
       });
     }
 
     function resetSession() {
-      if (confirm("Reset current scores and queue state?")) {
-        state.players.forEach(p => { p.gamesPlayed = 0; p.wins = 0; p.losses = 0; p.restingRounds = 0; });
-        state.courts.forEach(c => { c.active = false; c.team1 = []; c.team2 = []; });
+      if (confirm("Reset scores and match history? (Roster will be preserved)")) {
+        state.players.forEach(p => { 
+          p.gamesPlayed = 0; 
+          p.wins = 0; 
+          p.losses = 0; 
+        });
+        state.courts.forEach(c => { 
+          c.active = false; 
+          c.team1 = []; 
+          c.team2 = []; 
+        });
+        state.totalMatchesCompleted = 0;
+        state.courtHistory = {};
+        state.partnerHistory = {};
         saveState();
       }
     }
