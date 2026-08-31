@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Willis Pickle Watson - Pro Matchmaker</title>
+  <title>Willis Pickle Watson - Random Matchmaker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -44,7 +44,6 @@
 
     <!-- TAB 1: QUEUE -->
     <div id="tab-play" class="tab-content active space-y-5">
-      <!-- DASHBOARD STATS -->
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl">
           <span class="text-slate-400 block text-[10px] uppercase">Session Target</span>
@@ -56,19 +55,17 @@
         </div>
       </div>
 
-      <!-- COURTS -->
       <section>
         <div class="flex justify-between items-center mb-2">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Courts Lineup</h2>
-          <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">⚡ Fill Empty Courts</button>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Active Courts</h2>
+          <button onclick="nextRound()" class="bg-green-500 hover:bg-green-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-lg shadow-green-500/20 active:scale-95 transition">🎲 Randomize Next</button>
         </div>
         <div id="courtsContainer" class="space-y-3"></div>
       </section>
 
-      <!-- BENCH -->
       <section>
         <div class="flex justify-between items-center mb-2">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Bench (Queue Priority)</h2>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Bench & Rest Pool</h2>
           <span id="benchCount" class="text-[11px] text-slate-400">0 Waiting</span>
         </div>
         <div id="benchList" class="grid grid-cols-2 gap-2"></div>
@@ -134,7 +131,7 @@
     </div>
   </main>
 
-  <!-- BOTTOM BAR -->
+  <!-- NAV -->
   <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-6 py-2 flex justify-around items-center z-20">
     <button onclick="switchTab('play')" id="nav-play" class="flex flex-col items-center gap-1 text-green-400">
       <span class="text-lg">🏸</span>
@@ -155,12 +152,10 @@
       players: [],
       courts: [{ id: 1, team1: [], team2: [], active: false }],
       settings: { hours: 3, courtCount: 1 },
-      totalMatchesCompleted: 0,
-      partnerHistory: {} // 'idA_idB': count
+      totalMatchesCompleted: 0
     };
 
     let state = JSON.parse(localStorage.getItem('wpw_state')) || DEFAULT_STATE;
-    if (!state.partnerHistory) state.partnerHistory = {};
     if (typeof state.totalMatchesCompleted === 'undefined') state.totalMatchesCompleted = 0;
     if (!state.settings) state.settings = { hours: 3, courtCount: 1 };
 
@@ -181,7 +176,16 @@
       });
     }
 
-    // FORM: Add Player
+    // Fisher-Yates True Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
     document.getElementById('addPlayerForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const input = document.getElementById('playerName');
@@ -196,7 +200,6 @@
           gamesPlayed: minGamesPlayed,
           wins: 0,
           losses: 0,
-          restingRounds: 10,
           activeStatus: 'active'
         });
         input.value = '';
@@ -210,7 +213,6 @@
       
       p.activeStatus = p.activeStatus === 'standby' ? 'active' : 'standby';
       
-      // If player paused mid-game, free their court
       if (p.activeStatus === 'standby') {
         state.courts.forEach(court => {
           if (court.team1.includes(id) || court.team2.includes(id)) {
@@ -225,7 +227,6 @@
 
     function deletePlayer(id) {
       state.players = state.players.filter(p => p.id !== id);
-      // Clean up court slots safely
       state.courts.forEach(court => {
         if (court.team1.includes(id) || court.team2.includes(id)) {
           court.active = false;
@@ -262,72 +263,54 @@
       saveState();
     }
 
-    // Helper: calculate times two players were paired
-    function getPairKey(id1, id2) {
-      return [id1, id2].sort((a,b) => a - b).join('_');
-    }
-
-    function getPartnershipCount(id1, id2) {
-      return state.partnerHistory[getPairKey(id1, id2)] || 0;
-    }
-
-    // MATCHMAKER ENGINE
+    // RANDOMIZED FAIR MATCHMAKER
     function nextRound() {
       const currentlyOnCourtIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
 
-      let availablePool = state.players
-        .filter(p => p.activeStatus !== 'standby' && !currentlyOnCourtIds.includes(p.id))
-        .sort((a, b) => {
-          if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
-          return b.restingRounds - a.restingRounds;
-        });
-
+      // All waiting, active players
+      let benchPool = state.players.filter(p => p.activeStatus !== 'standby' && !currentlyOnCourtIds.includes(p.id));
       const openCourts = state.courts.filter(c => !c.active);
 
       if (openCourts.length === 0) {
-        alert("All courts are currently active!");
+        alert("All courts are currently in game!");
         return;
       }
 
-      if (availablePool.length < 4) {
+      if (benchPool.length < 4) {
         alert("Need at least 4 available players on the bench to fill an open court!");
         return;
       }
 
       openCourts.forEach(court => {
-        if (availablePool.length >= 4) {
-          const fourPlayers = availablePool.splice(0, 4);
+        if (benchPool.length >= 4) {
+          // Sort by games played to maintain overall fairness
+          benchPool.sort((a, b) => a.gamesPlayed - b.gamesPlayed);
 
-          // Pair the 4 players to minimize previous partnership overlap
-          // 3 possible pairings: (0,1 vs 2,3), (0,2 vs 1,3), (0,3 vs 1,2)
-          const p = fourPlayers;
-          const combinations = [
-            { t1: [p[0], p[1]], t2: [p[2], p[3]], score: getPartnershipCount(p[0].id, p[1].id) + getPartnershipCount(p[2].id, p[3].id) },
-            { t1: [p[0], p[2]], t2: [p[1], p[3]], score: getPartnershipCount(p[0].id, p[2].id) + getPartnershipCount(p[1].id, p[3].id) },
-            { t1: [p[0], p[3]], t2: [p[1], p[2]], score: getPartnershipCount(p[0].id, p[3].id) + getPartnershipCount(p[1].id, p[2].id) }
-          ];
+          // Get players in the lowest tier of games played
+          const lowestGameCount = benchPool[0].gamesPlayed;
+          let tier = benchPool.filter(p => p.gamesPlayed <= lowestGameCount + 1);
 
-          combinations.sort((a, b) => a.score - b.score);
-          const best = combinations[0];
+          // Shuffle tier so selection of 4 is completely random
+          tier = shuffleArray(tier);
 
-          court.team1 = [best.t1[0].id, best.t1[1].id];
-          court.team2 = [best.t2[0].id, best.t2[1].id];
+          // Take 4 players
+          const selected = tier.slice(0, 4);
+          
+          // Remove them from benchPool
+          benchPool = benchPool.filter(p => !selected.some(sel => sel.id === p.id));
+
+          // Randomize who is Team 1 and Team 2
+          const shuffledMatch = shuffleArray(selected);
+
+          court.team1 = [shuffledMatch[0].id, shuffledMatch[1].id];
+          court.team2 = [shuffledMatch[2].id, shuffledMatch[3].id];
           court.active = true;
-        }
-      });
-
-      // Increment rest counter for remaining bench players
-      const allActiveIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
-      state.players.forEach(p => {
-        if (!allActiveIds.includes(p.id) && p.activeStatus !== 'standby') {
-          p.restingRounds++;
         }
       });
 
       saveState();
     }
 
-    // MANUAL ON-COURT SWAPS
     function swapCourtPlayer(courtIdx, teamNum, slotIdx, newPlayerId) {
       const targetId = Number(newPlayerId);
       const court = state.courts[courtIdx];
@@ -336,7 +319,6 @@
 
       if (oldPlayerId === targetId) return;
 
-      // If chosen player is in team 1
       const inT1 = court.team1.indexOf(targetId);
       const inT2 = court.team2.indexOf(targetId);
 
@@ -350,7 +332,6 @@
       saveState();
     }
 
-    // WIN RECORDING
     function recordWinner(courtIdx, winningTeam) {
       const court = state.courts[courtIdx];
       if (!court.active) return;
@@ -358,20 +339,14 @@
       const winners = winningTeam === 1 ? court.team1 : court.team2;
       const losers = winningTeam === 1 ? court.team2 : court.team1;
 
-      // Track partnership synergy
-      const keyT1 = getPairKey(court.team1[0], court.team1[1]);
-      const keyT2 = getPairKey(court.team2[0], court.team2[1]);
-      state.partnerHistory[keyT1] = (state.partnerHistory[keyT1] || 0) + 1;
-      state.partnerHistory[keyT2] = (state.partnerHistory[keyT2] || 0) + 1;
-
       winners.forEach(id => {
         const p = getPlayer(id);
-        if (p) { p.wins++; p.gamesPlayed++; p.restingRounds = 0; }
+        if (p) { p.wins++; p.gamesPlayed++; }
       });
 
       losers.forEach(id => {
         const p = getPlayer(id);
-        if (p) { p.losses++; p.gamesPlayed++; p.restingRounds = 0; }
+        if (p) { p.losses++; p.gamesPlayed++; }
       });
 
       state.totalMatchesCompleted++;
@@ -390,15 +365,14 @@
     }
 
     function render() {
-      // Sync form settings
       document.getElementById('sessionHours').value = state.settings.hours;
       document.getElementById('courtCount').value = state.settings.courtCount;
 
       const activePlayers = state.players.filter(p => p.activeStatus !== 'standby');
       document.getElementById('sessionSummary').innerText = `${activePlayers.length} Active (${state.players.length} Roster) · ${state.courts.length} Court(s)`;
-      document.getElementById('roundsBadge').innerText = `${state.totalMatchesCompleted} Matches Done`;
+      document.getElementById('roundsBadge').innerText = `${state.totalMatchesCompleted} Matches`;
 
-      // Render Courts
+      // Active Courts Render
       const courtsContainer = document.getElementById('courtsContainer');
       courtsContainer.innerHTML = '';
       
@@ -408,8 +382,8 @@
         if (court.active && court.team1.length === 2 && court.team2.length === 2) {
           div.innerHTML = `
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-              <span class="text-xs font-bold text-green-400 uppercase tracking-wider">Court ${court.id} (In Game)</span>
-              <span class="text-[10px] text-slate-400">Select player to swap</span>
+              <span class="text-xs font-bold text-green-400 uppercase tracking-wider">Court ${court.id} (Playing)</span>
+              <span class="text-[10px] text-slate-400">Tap name to swap</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-center text-xs">
               <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
@@ -450,7 +424,7 @@
         courtsContainer.appendChild(div);
       });
 
-      // Render Bench with Queue Priority
+      // Bench Pool Render
       const activeCourtIds = state.courts.filter(c => c.active).flatMap(c => [...c.team1, ...c.team2]);
       const benchList = document.getElementById('benchList');
       benchList.innerHTML = '';
@@ -460,32 +434,28 @@
         .sort((a, b) => {
           if (a.activeStatus === 'standby' && b.activeStatus !== 'standby') return 1;
           if (b.activeStatus === 'standby' && a.activeStatus !== 'standby') return -1;
-          if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
-          return b.restingRounds - a.restingRounds;
+          return a.gamesPlayed - b.gamesPlayed;
         });
 
-      document.getElementById('benchCount').innerText = `${waitingPlayers.filter(p => p.activeStatus !== 'standby').length} Waiting`;
+      document.getElementById('benchCount').innerText = `${waitingPlayers.filter(p => p.activeStatus !== 'standby').length} Available`;
 
-      waitingPlayers.forEach((p, queueIdx) => {
+      waitingPlayers.forEach(p => {
         const isStandby = p.activeStatus === 'standby';
         const card = document.createElement('div');
         card.className = `p-2.5 rounded-xl flex justify-between items-center text-xs border ${isStandby ? 'bg-slate-900/50 border-slate-800 opacity-50' : 'bg-slate-800/80 border-slate-700/80'}`;
         card.innerHTML = `
           <div>
-            <div class="flex items-center gap-1.5">
-              ${!isStandby ? `<span class="text-[9px] bg-slate-700 font-bold px-1 rounded text-slate-300">#${queueIdx + 1}</span>` : ''}
-              <span class="font-bold text-slate-200">${p.name}</span>
-            </div>
-            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played · rested ${p.restingRounds}r</span>
+            <span class="font-bold text-slate-200 block">${p.name}</span>
+            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played</span>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${isStandby ? 'bg-amber-900/40 text-amber-300 border border-amber-800/50' : 'bg-green-900/30 text-green-300 border border-green-800/40'}">
-            ${isStandby ? 'AFK' : 'Ready'}
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${isStandby ? 'bg-amber-900/40 text-amber-300 border border-amber-800/50' : 'bg-slate-700 text-slate-300'}">
+            ${isStandby ? 'AFK' : 'Resting'}
           </span>
         `;
         benchList.appendChild(card);
       });
 
-      // Render Roster Manager
+      // Roster Render
       const rosterList = document.getElementById('rosterList');
       rosterList.innerHTML = '';
       state.players.forEach(p => {
@@ -495,7 +465,7 @@
         row.innerHTML = `
           <div>
             <span class="font-bold text-slate-200 block">${p.name}</span>
-            <span class="text-[10px] text-slate-400">${p.gamesPlayed} games (${p.wins}W - ${p.losses}L)</span>
+            <span class="text-[10px] text-slate-400">${p.gamesPlayed} played (${p.wins}W - ${p.losses}L)</span>
           </div>
           <div class="flex gap-2">
             <button onclick="togglePlayerStatus(${p.id})" class="px-2.5 py-1 rounded-lg font-bold text-[10px] transition ${isStandby ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-700 text-slate-300'}">
@@ -507,15 +477,15 @@
         rosterList.appendChild(row);
       });
 
-      // Render Leaderboard
+      // Leaderboard Render
       const leaderboardBody = document.getElementById('leaderboardBody');
       leaderboardBody.innerHTML = '';
       
       const rankedPlayers = [...state.players].sort((a,b) => {
         const winPctA = a.gamesPlayed ? (a.wins / a.gamesPlayed) : 0;
         const winPctB = b.gamesPlayed ? (b.wins / b.gamesPlayed) : 0;
-        if (b.wins !== a.wins) return b.wins - a.wins; // Total wins first
-        return winPctB - winPctA;                      // Win rate second
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        return winPctB - winPctA;
       });
 
       rankedPlayers.forEach((p, rankIdx) => {
@@ -536,12 +506,11 @@
     }
 
     function resetSession() {
-      if (confirm("Reset match scores, match counts, and clear active courts? (Player roster will be preserved)")) {
+      if (confirm("Reset scores and queue state? (Roster will be preserved)")) {
         state.players.forEach(p => { 
           p.gamesPlayed = 0; 
           p.wins = 0; 
           p.losses = 0; 
-          p.restingRounds = 10; 
         });
         state.courts.forEach(c => { 
           c.active = false; 
@@ -549,7 +518,6 @@
           c.team2 = []; 
         });
         state.totalMatchesCompleted = 0;
-        state.partnerHistory = {};
         saveState();
       }
     }
